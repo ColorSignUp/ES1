@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+</head>
+<body>
+    <script>
+        let redirectUrl = "https://www.example.com"; // Place your redirect URL here
+        let countdown = 3;
+        
+        const countdownInterval = setInterval(() => {
+            document.body.innerHTML = "Redirecting in " + countdown + " seconds...";
+            countdown--;
+            if (countdown < 0) {
+                clearInterval(countdownInterval);
+                window.location.replace(redirectUrl);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
