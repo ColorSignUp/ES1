@@ -1,16 +1,23 @@
-
-
-
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript">
-        location.replace("https://91appl.com/#/register?invitationCode=55817282407");
-    </script>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <script>
+    // List of URLs
+    const links = [
+      "https://www.dmwin5.com/#/register?invitationCode=457652505619",
+      "https://www.dmwin2.com/#/register?invitationCode=832782515408"
+    ];
+
+    // Pick a random link and redirect
+    window.onload = function () {
+      const randomIndex = Math.floor(Math.random() * links.length);
+      window.location.href = links[randomIndex];
+    };
+  </script>
 </head>
 <body>
+  <p>Redirecting...</p>
 </body>
 </html>
