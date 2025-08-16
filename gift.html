@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIFT CODE SYSTEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6e45e2;
+            --secondary: #88d3ce;
+            --accent: #ff7e5f;
+            --dark: #2a2d3e;
+            --light: #f9f9ff;
+            --success: #4caf50;
+            --error: #f44336;
+            --warning: #ff9800;
+            --whatsapp: #25D366;
+            --instagram: #E1306C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Matrix Background */
+        .matrix-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        .binary-code {
+            position: absolute;
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            opacity: 0;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+
+        /* Scanlines */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.03),
+                rgba(0,0,0,0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: var(--dark);
+            opacity: 0.8;
+            font-size: 0.9rem;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        /* Game Selection */
+        .selection-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .selection-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        /* Game List */
+        .game-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .game-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid rgba(110, 69, 226, 0.1);
+        }
+
+        .game-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(110, 69, 226, 0.2);
+            border-color: rgba(110, 69, 226, 0.3);
+        }
+
+        .game-item-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+            border: 1px solid rgba(110, 69, 226, 0.2);
+        }
+
+        .game-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .modal-text {
+            margin-bottom: 20px;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+        .btn {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: white;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #8a63e6 100%);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent) 0%, #ff9a7a 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #66bb6a 100%);
+        }
+
+        .btn-error {
+            background: linear-gradient(135deg, var(--error) 0%, #e57373 100%);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        /* Gift Code Display */
+        .gift-code-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(110, 69, 226, 0.05);
+            border-radius: 10px;
+            border: 1px dashed rgba(110, 69, 226, 0.3);
+        }
+
+        .gift-code-title {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .gift-code {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            color: var(--primary);
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 5px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .copied-message {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .show-copied {
+            opacity: 1;
+        }
+
+        /* Terminal */
+        .terminal-line {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: var(--primary);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .title {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Button Animation */
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+            100% { opacity: 0.3; }
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent 45%,
+                rgba(255, 255, 255, 0.2) 50%,
+                transparent 55%
+            );
+            transform: rotate(30deg);
+            animation: pulse 3s infinite linear;
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Effect -->
+    <div class="matrix-effect" id="matrixEffect"></div>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">GIFT CODE SYSTEM</h1>
+            <p class="subtitle">>_ Select your game to get exclusive gift code</p>
+        </div>
+
+        <div class="selection-container">
+            <h2 class="selection-title">CHOOSE YOUR GAME</h2>
+            
+            <div class="game-list" id="gameList">
+                <!-- Game items will be added dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <h2 class="modal-title">SHARE TO UNLOCK</h2>
+            <p class="modal-text">Please share this page to unlock your gift code. This helps us grow our community.</p>
+            <button class="btn btn-primary" id="shareBtn">
+                <i class="fas fa-share-alt"></i>
+                SHARE NOW
+            </button>
+        </div>
+    </div>
+
+    <!-- Gift Code Modal -->
+    <div class="modal" id="giftCodeModal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="giftCodeGameName">GIFT CODE</h2>
+            
+            <div class="gift-code-container">
+                <div class="gift-code-title">YOUR EXCLUSIVE GIFT CODE:</div>
+                <div class="gift-code" id="giftCodeDisplay">
+                    <span id="giftCodeText"></span>
+                    <div class="copied-message" id="copiedMessage">COPIED!</div>
+                </div>
+                <button class="copy-btn" id="copyBtn">
+                    <i class="fas fa-copy"></i>
+                    COPY CODE
+                </button>
+            </div>
+            
+            <p class="modal-text">Use this code in the game to claim your rewards.</p>
+            <button class="btn btn-success" id="closeModalBtn">
+                <i class="fas fa-check"></i>
+                THANK YOU
+            </button>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal" id="errorModal">
+        <div class="modal-content">
+            <h2 class="modal-title">SHARE FAILED</h2>
+            <p class="modal-text">Please share again to unlock your gift code.</p>
+            <button class="btn btn-error" id="retryShareBtn">
+                <i class="fas fa-redo"></i>
+                TRY AGAIN
+            </button>
+        </div>
+    </div>
+
+    <div class="terminal-line">>_ SYSTEM_READY_FOR_GIFT_CODES</div>
+
+    <script>
+        // Create matrix effect
+        function createMatrixEffect() {
+            const chars = "01";
+            const container = document.getElementById('matrixEffect');
+            
+            for (let i = 0; i < 50; i++) {
+                const binaryCode = document.createElement('div');
+                binaryCode.classList.add('binary-code');
+                binaryCode.textContent = Array(20).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join(' ');
+                binaryCode.style.left = `${Math.random() * 100}%`;
+                binaryCode.style.animationDuration = `${5 + Math.random() * 10}s`;
+                binaryCode.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(binaryCode);
+            }
+        }
+        
+        // Game data with gift codes (you can replace these with your actual codes)
+        const games = [
+            { id: 1, name: "91CLUB", logo: "logo1.png", code: "XK8P-7T2F-9Q1R-6Y5M" },
+            { id: 2, name: "55club", logo: "logo2.png", code: "3N9B-4M7V-1C8X-2Z6L" },
+            { id: 3, name: "in999", logo: "logo3.png", code: "5D9F-8G2H-3J4K-7L6P" },
+            { id: 4, name: "Daman", logo: "logo4.png", code: "9Q1W-2E3R-4T5Y-6U7I" },
+            { id: 5, name: "Okwin", logo: "logo5.png", code: "8O7P-6I5U-4Y3T-2R1E" },
+            { id: 6, name: "Tiranga", logo: "logo6.png", code: "1A2S-3D4F-5G6H-7J8K" },
+            { id: 7, name: "Big Daddy", logo: "logo7.png", code: "L9Z8-X7C6-V5B4-N3M2" },
+            { id: 8, name: "Bdgwin", logo: "logo8.png", code: "Q1W2-E3R4-T5Y6-U7I8" },
+            { id: 9, name: "Big Mumbai", logo: "logo9.png", code: "O9P0-I8U7-Y6T5-R4E3" },
+            { id: 10, name: "Jalwa Win", logo: "logo10.png", code: "A1S2-D3F4-G5H6-J7K8" },
+            { id: 11, name: "DiuWin", logo: "logo11.png", code: "Z9X8-C7V6-B5N4-M3L2" },
+            { id: 12, name: "Tashan Win", logo: "logo12.png", code: "1Q2W-3E4R-5T6Y-7U8I" },
+            { id: 13, name: "82Lottery", logo: "logo13.png", code: "9O8P-7I6U-5Y4T-3R2E" },
+            { id: 14, name: "51game", logo: "logo14.png", code: "2A3S-4D5F-6G7H-8J9K" },
+            { id: 15, name: "Raja Lottery", logo: "logo15.png", code: "L0Z9-X8C7-V6B5-N4M3" },
+            { id: 16, name: "Bdg Slots", logo: "logo16.png", code: "Q0W9-E8R7-T6Y5-U4I3" },
+            { id: 17, name: "Kwg Game", logo: "logo17.png", code: "O7P6-I5U4-Y3T2-R1E0" },
+            { id: 18, name: "Tc Lottery", logo: "logo18.png", code: "A9S8-D7F6-G5H4-J3K2" }
+        ];
+
+        // Current selected game
+        let selectedGame = null;
+        let shareAttempted = false;
+
+        // Function to open URL in external browser
+        function openInExternalBrowser(url) {
+            if (typeof Android !== 'undefined' && Android.openInExternalBrowser) {
+                Android.openInExternalBrowser(url);
+            } else {
+                window.open(url, '_system');
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            createMatrixEffect();
+            
+            // Populate game list
+            const gameList = document.getElementById('gameList');
+            games.forEach(game => {
+                const gameItem = document.createElement('div');
+                gameItem.className = 'game-item';
+                gameItem.dataset.id = game.id;
+                
+                gameItem.innerHTML = `
+                    <img src="${game.logo}" alt="${game.name}" class="game-item-logo">
+                    <div class="game-item-name">${game.name}</div>
+                `;
+                
+                gameItem.addEventListener('click', () => {
+                    selectedGame = game;
+                    document.getElementById('shareModal').style.display = 'flex';
+                });
+                
+                gameList.appendChild(gameItem);
+            });
+
+            // Share button click
+            document.getElementById('shareBtn').addEventListener('click', function() {
+                openInExternalBrowser('https://colorsignup.github.io/ES1/gift.html');
+                
+                // Show error after 5 seconds if first attempt
+                if (!shareAttempted) {
+                    setTimeout(() => {
+                        document.getElementById('shareModal').style.display = 'none';
+                        document.getElementById('errorModal').style.display = 'flex';
+                    }, 5000);
+                } else {
+                    // On second attempt, show gift code
+                    setTimeout(() => {
+                        document.getElementById('shareModal').style.display = 'none';
+                        showGiftCode();
+                    }, 1000);
+                }
+            });
+
+            // Retry share button
+            document.getElementById('retryShareBtn').addEventListener('click', function() {
+                shareAttempted = true;
+                document.getElementById('errorModal').style.display = 'none';
+                document.getElementById('shareModal').style.display = 'flex';
+            });
+
+            // Show gift code
+            function showGiftCode() {
+                document.getElementById('giftCodeGameName').textContent = `${selectedGame.name} GIFT CODE`;
+                document.getElementById('giftCodeText').textContent = selectedGame.code;
+                document.getElementById('giftCodeModal').style.display = 'flex';
+            }
+
+            // Copy button
+            document.getElementById('copyBtn').addEventListener('click', function() {
+                navigator.clipboard.writeText(selectedGame.code).then(() => {
+                    const copiedMessage = document.getElementById('copiedMessage');
+                    copiedMessage.classList.add('show-copied');
+                    setTimeout(() => {
+                        copiedMessage.classList.remove('show-copied');
+                    }, 2000);
+                });
+            });
+
+            // Close modal button
+            document.getElementById('closeModalBtn').addEventListener('click', function() {
+                document.getElementById('giftCodeModal').style.display = 'none';
+                selectedGame = null;
+                shareAttempted = false;
+            });
+
+            // Terminal commands
+            const commands = [
+                "INITIALIZING_GIFT_SYSTEM",
+                "CONNECTING_TO_SERVER",
+                "LOADING_GIFT_CODES",
+                "SYSTEM_READY",
+                "ACCESS_GRANTED"
+            ];
+            
+            let commandIndex = 0;
+            setInterval(() => {
+                const terminal = document.querySelector('.terminal-line');
+                terminal.textContent = `>_ ${commands[commandIndex]}`;
+                commandIndex = (commandIndex + 1) % commands.length;
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
